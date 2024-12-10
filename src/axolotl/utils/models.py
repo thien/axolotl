@@ -46,6 +46,8 @@ from transformers.integrations.deepspeed import (
     HfTrainerDeepSpeedConfig,
     is_deepspeed_zero3_enabled,
 )
+from transformers.integrations.deepspeed import is_deepspeed_zero3_enabled
+from transformers.quantizers import AutoHfQuantizer
 
 from axolotl.common.architectures import MOE_ARCH_BLOCK
 from axolotl.models.mamba import fix_mamba_attn_for_loss
@@ -792,7 +794,7 @@ class ModelLoader:
             qlora_fsdp
             and self.cfg.fsdp_config.fsdp_cpu_ram_efficient_loading
             and (
-                self.cfg.model_config_type == "dbrx"
+                self.cfg.qlora_fsdp_alt_loader
                 or self.cfg.qlora_sharded_model_loading
             )
         ):
@@ -812,6 +814,11 @@ class ModelLoader:
                 quant_storage=quant_storage,
                 quantization_config=quantization_config,
             )
+            if model_kwargs["quantization_config"]:
+                hf_quantizer = AutoHfQuantizer.from_config(
+                    model_kwargs["quantization_config"]
+                )
+                model.hf_quantizer = hf_quantizer
             skip_move_to_device = True
         elif (
             self.model_config.model_type == "llama"
