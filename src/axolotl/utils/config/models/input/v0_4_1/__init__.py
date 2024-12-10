@@ -608,12 +608,16 @@ class AxolotlInputConfig(
 
     rl: Optional[RLType] = None
     reward_model: Optional[bool] = None
-    dpo_use_weighting: Optional[
-        bool
-    ] = None  # whether to use weighting in DPO trainer. If none, default is false in the trainer.
+    dpo_use_weighting: Optional[bool] = (
+        None  # whether to use weighting in DPO trainer. If none, default is false in the trainer.
+    )
 
-    datasets: Optional[conlist(Union[SFTDataset, DPODataset, KTODataset], min_length=1)] = None  # type: ignore
-    test_datasets: Optional[conlist(Union[SFTDataset, DPODataset, KTODataset], min_length=1)] = None  # type: ignore
+    datasets: Optional[
+        conlist(Union[SFTDataset, DPODataset, KTODataset], min_length=1)
+    ] = None  # type: ignore
+    test_datasets: Optional[
+        conlist(Union[SFTDataset, DPODataset, KTODataset], min_length=1)
+    ] = None  # type: ignore
     shuffle_merged_datasets: Optional[bool] = True
     dataset_prepared_path: Optional[str] = None
     dataset_shard_num: Optional[int] = None
@@ -774,9 +778,9 @@ class AxolotlInputConfig(
     kto_undesirable_weight: Optional[float] = None
     rl_beta: Optional[float] = None
 
-    max_memory: Optional[
-        Dict[Union[int, Literal["cpu", "disk"]], Union[int, str]]
-    ] = None
+    max_memory: Optional[Dict[Union[int, Literal["cpu", "disk"]], Union[int, str]]] = (
+        None
+    )
     gpu_memory_limit: Optional[Union[int, str]] = None
     low_cpu_mem_usage: Optional[bool] = None
 
@@ -1365,6 +1369,20 @@ class AxolotlInputConfig(
         ):
             raise ValueError(
                 f"FSDP Offload not compatible with {data.get('optimizer')}"
+            )
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_fsdp_sync_module_states(cls, data):
+        if (
+            data.get("fsdp")
+            and data.get("fsdp_config")
+            and data["fsdp_config"].get("fsdp_state_dict_type")
+            and not data["fsdp_config"].get("fsdp_sync_module_states")
+        ):
+            LOG.warning(
+                "We recommend setting fsdp_config.fsdp_sync_module_states to `true`"
             )
         return data
 
