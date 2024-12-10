@@ -12,6 +12,7 @@ from transformers.testing_utils import get_torch_dist_unique_port
 from axolotl.utils.dict import DictDefault
 
 from ..utils import check_tensorboard
+from ..utils import with_temp_dir
 
 LOG = logging.getLogger("axolotl.tests.e2e.multigpu")
 os.environ["WANDB_DISABLED"] = "true"
@@ -90,9 +91,10 @@ class TestMultiGPUEval:
                 str(Path(temp_dir) / "config.yaml"),
             ]
         )
-
         check_tensorboard(temp_dir + "/runs", "eval/loss", 2.5, "Eval Loss is too high")
 
+
+    @with_temp_dir
     def test_eval(self, temp_dir):
         # pylint: disable=duplicate-code
         cfg = DictDefault(

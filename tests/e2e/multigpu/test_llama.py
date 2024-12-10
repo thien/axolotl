@@ -36,7 +36,7 @@ class TestMultiGPULlama:
         # pylint: disable=duplicate-code
         cfg = DictDefault(
             {
-                "base_model": "HuggingFaceTB/SmolLM2-135M",
+                "base_model": "HuggingFaceTB/SmolLM-135M",
                 "sequence_len": 2048,
                 "adapter": "lora",
                 "lora_r": 8,
